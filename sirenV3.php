@@ -1,6 +1,5 @@
 <?php
 
-use PhpParser\Node\Stmt\Foreach_;
 
 $ch = curl_init();
 $date=date('Y-m-d');
@@ -17,7 +16,7 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
 $result = curl_exec($ch);
 if (curl_errno($ch)) {
-    echo 'Error:' . curl_error($ch);
+    echo 'Error:' ;
 }else{
     $decoded = json_decode($result);
     $decoded = json_decode($result, true);
@@ -27,8 +26,7 @@ $key = array_search('statut', $decoded);
 
 $TOTALEntreprise=0;
 $TOTALEntreprise=$decoded['header']['total'];
-$j=600;
-echo("\n".$j."\n");
+$j=10;
 $debut=0;
 $List_siret = array();
 
@@ -43,17 +41,40 @@ while($j>0){
         }
     $debut+=1000;
     $j=$j-1000;
-    echo("\n".$j);    
 }
 
 
-//var_dump($TOTALEntreprise);
-echo("---------------------------------------------\n\n\n");
-//print_r($decoded);
+
 
 
 function call_curl($date,$debut,$nombre,$headers,$List_siret)
 {
+
+    $url='https://api.insee.fr/entreprises/sirene/V3/siret?date='.$date.'&q=(periode(etatAdministratifEtablissement:A))AND%20(trancheEffectifsEtablissement:01%20OR%20trancheEffectifsEtablissement:02%20OR%20trancheEffectifsEtablissement:11)&nombre='.$nombre.'&debut='.$debut;
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_HEADER, 0);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    $result = curl_exec ($ch);
+  
+    if (curl_errno($ch)) {
+        echo 'Error:';
+    }else{
+        $decoded = json_decode($result, true);
+        $arraySiren=[];
+        $arraySiren=$decoded['etablissements'];
+        foreach ($arraySiren as $val){
+            $siret=$val['siret'];
+            array_push($List_siret,$siret);
+           
+         }
+    }
+
+    curl_close($ch);
+}
+
+write_csv();
+function write_csv(){
     $data = [
         ['Title', 'image1', 'image2'],
         ['GOOG', 'Google Inc.', '800'],
@@ -62,33 +83,8 @@ function call_curl($date,$debut,$nombre,$headers,$List_siret)
         ['YHOO', 'Yahoo! Inc.', '250'],
         ['FB', 'Facebook, Inc.', '30'],
     ];
-    $url='https://api.insee.fr/entreprises/sirene/V3/siret?date='.$date.'&q=(periode(etatAdministratifEtablissement:A))AND%20(trancheEffectifsEtablissement:01%20OR%20trancheEffectifsEtablissement:02%20OR%20trancheEffectifsEtablissement:11)&nombre='.$nombre.'&debut='.$debut;
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_HEADER, 0);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    $result = curl_exec ($ch);
-    curl_close($ch);
-    if (curl_errno($ch)) {
-        echo 'Error:' . curl_error($ch);
-    }else{
-        $decoded = json_decode($result);
-        $decoded = json_decode($result, true);
-        $arraySiren=[];
-        $arraySiren=$decoded['etablissements'];
-        foreach ($arraySiren as $val){
-            $siret=$val['siret'];
-            var_dump($siret);
-            array_push($List_siret,$siret);
-            write_csv($data);
-         }
-
-    }
-}
-
-function write_csv($data){
-    $filename = 'resultat.csv';
-    $f = fopen($filename, 'aw');
+    $filename = './resultat.csv';
+    $f = fopen($filename, 'ac');
     if ($f === false) {
         die('Error opening the file ' . $filename);
     }
