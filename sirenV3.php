@@ -33,17 +33,54 @@ $List_siret = array();
 while($j>0){
         if($j>=1000){
             $nombre=1000;
-            call_curl($date,$debut,$nombre,$headers,$List_siret);
         }else{
             $nombre=$j;
-            call_curl($date,$debut,$nombre,$headers,$List_siret);
-
         }
+        $url='https://api.insee.fr/entreprises/sirene/V3/siret?date='.$date.'&q=(periode(etatAdministratifEtablissement:A))AND%20(trancheEffectifsEtablissement:01%20OR%20trancheEffectifsEtablissement:02%20OR%20trancheEffectifsEtablissement:11)&nombre='.$nombre.'&debut='.$debut;
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_multi_add_handle($mh,$ch);
+
     $debut+=1000;
     $j=$j-1000;
 }
+//execute the multi handle
+do {
+    $status = curl_multi_exec($mh, $active);
+    if ($active) {
+        $res=curl_multi_select($mh);
+        var_dump($res);
+    }
+} while ($active && $status == CURLM_OK);
 
 
+function add_curl($date,$debut,$nombre,$headers,$List_siret)
+{
+
+    $url='https://api.insee.fr/entreprises/sirene/V3/siret?date='.$date.'&q=(periode(etatAdministratifEtablissement:A))AND%20(trancheEffectifsEtablissement:01%20OR%20trancheEffectifsEtablissement:02%20OR%20trancheEffectifsEtablissement:11)&nombre='.$nombre.'&debut='.$debut;
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_HEADER, 0);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    $result = curl_exec ($ch);
+  
+    if (curl_errno($ch)) {
+        echo 'Error:';
+    }else{
+        $decoded = json_decode($result, true);
+        $arraySiren=[];
+        $arraySiren=$decoded['etablissements'];
+        foreach ($arraySiren as $val){
+            $siret=$val['siret'];
+            array_push($List_siret,$siret);
+           
+         }
+    }
+
+    curl_close($ch);
+}
 
 
 
