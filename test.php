@@ -8,7 +8,7 @@ $headers[] = 'Authorization: Bearer 974f2f2b-9f16-3ad3-8b5b-5cce1a0d3441';
 //create the multiple cURL handle
 $mh = curl_multi_init();
 $i=0;
-$j=1200;
+$j=120000;
 
 while($j>0){
     if($j>=1000){
@@ -16,7 +16,7 @@ while($j>0){
     }else{
         $nombre=$j;
     }
-    $url='https://api.insee.fr/entreprises/sirene/V3/siret?date='.$date.'&q=(periode(etatAdministratifEtablissement:A))AND%20(trancheEffectifsEtablissement:01%20OR%20trancheEffectifsEtablissement:02%20OR%20trancheEffectifsEtablissement:11)&nombre='.$nombre;
+    $url='https://api.insee.fr/entreprises/sirene/V3/siret?date='.$date.'&q=(periode(etatAdministratifEtablissement:A))AND%20(trancheEffectifsEtablissement:01%20OR%20trancheEffectifsEtablissement:02%20OR%20trancheEffectifsEtablissement:11)&nombre='.$nombre."&debut=".$debut;
     // create both cURL resources
     $ch[$i] = curl_init();
     // set URL and other appropriate options
