@@ -1,6 +1,6 @@
 <?php
   $filename = './resultat.csv';
-  if(file_exists($filename)){
+  /*if(file_exists($filename)){
    unlink($filename);
   }
   $data = [
@@ -11,7 +11,7 @@
   foreach ($data as $row) {
       fputcsv($f, $row);
   }
-fclose($f);
+fclose($f);*/
 $date=date('Y-m-d');
 $scociete=[];
 $debut=0;
@@ -23,10 +23,11 @@ $headers[] = 'Authorization: Bearer 974f2f2b-9f16-3ad3-8b5b-5cce1a0d3441';
 $mh = curl_multi_init();
 $i=0;
 $j=4001;
-$curseur="*";
+$curseur="AoEuMzM5NTg4MTcwMDAwMjk=";
 $f = fopen($filename, 'w');
+$fCurseur = fopen("./listCurseur.txt", 'w');
 $TOTALEntreprise=1486958;
-$k=1;
+$k=203035;
 while($k<=$TOTALEntreprise){
 
 
@@ -46,6 +47,7 @@ while($k<=$TOTALEntreprise){
     $x=$decoded['header']['curseurSuivant'];
     if(!is_null($x)){
         $curseur=$x;
+        fwrite($fCurseur,$curseur);
     }
     var_dump($curseur);
     $arraySiren=$decoded['etablissements'];
@@ -64,7 +66,7 @@ while($k<=$TOTALEntreprise){
         print_r($scociete);
         fputcsv($f, $scociete);
         $k++;
-        if($k==1000){
+        if($k%1000==0){
             sleep(1);
         }
     }
@@ -74,8 +76,8 @@ while($k<=$TOTALEntreprise){
     //add the two handles
 
 }
-fclose($f)
-
+fclose($f);
+fclose($fCurseur);
 /*
 //execute the multi handle
 do {
