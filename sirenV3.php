@@ -12,7 +12,7 @@ curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
 
 $headers = array();
 $headers[] = 'Accept: application/json';
-$headers[] = 'Authorization: Bearer 974f2f2b-9f16-3ad3-8b5b-5cce1a0d3441';
+$headers[] = 'Authorization: Bearer token';
 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
 $result = curl_exec($ch);
